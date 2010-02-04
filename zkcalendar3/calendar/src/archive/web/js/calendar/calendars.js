@@ -327,10 +327,7 @@ zkCalendars = {
 							dg.element.parentNode.parentNode.cellIndex
 				};
 				if (dg._zrz) {
-					dg._zdata.dur = (dg.element.offsetHeight - dg._zevt.offsetHeight) / hgh;
-					if (dg._zdata.dur < 0)
-						dg._zdata.dur = Math.floor(dg._zdata.dur);
-					else dg._zdata.dur = Math.ceil(dg._zdata.dur);
+					dg._zdata.dur = Math.floor((dg.element.offsetHeight - dg._zevt.offsetHeight) / hgh);
 				}
 			} else {
 				dg._zdata = {
