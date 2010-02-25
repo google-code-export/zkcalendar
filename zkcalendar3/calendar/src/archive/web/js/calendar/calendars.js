@@ -102,7 +102,7 @@ zkCalendars = {
 	],
 	init: function (cmp) {
 		var ts = $int(getZKAttr(cmp, "ts")),
-			cnt = $e(cmp, "cnt"),
+      cnt = $e(cmp, "cnt"),
 			tzOffset = $int(getZKAttr(cmp, "tz")),
 			row = zk.ie ? cnt.firstChild.rows[0].cells[0].firstChild.rows[1] :
 					cnt.firstChild.rows[1],
@@ -148,17 +148,26 @@ zkCalendars = {
 		zk.listen(cnt, "scroll", function () {
 			zkCalendars._scrollInfo[cmp.id] = cnt.scrollTop;
 		});
-		
+
+		// Support for click on event in readonly mode, too. xmedeko 25.2.2010
+    zk.listen(cnt, 'click', function(evt) {
+    if (!zk.dragging && !zkau.processing()) {
+      zkCalendars.onClick(cnt, evt);
+    } else
+      Event.stop(evt) ;
+    });
+
+	  var daylong = $e(cmp, "daylong");
+	  zk.listen(daylong, 'click', function(evt) {
+      if (!zk.dragging && !zkau.processing()) {
+        zkCalendars.onDaylongClick(daylong, evt);
+      } else
+        Event.stop(evt);
+	  });
+
 		if (!getZKAttr(cmp, "readonly")) {
 			// a trick for dragdrop.js
 			cnt._skipped = true;
-      zk.listen(cnt, 'click', function(evt) {
-      if (!zk.dragging && !zkau.processing()) {
-        zkCalendars.clearGhost(cmp);
-        zkCalendars.onClick(cnt, evt);
-      } else
-        Event.stop(evt) ;
-      });
 			zkCalendars._drag[cnt.id] = new zDraggable(cnt, {
 				starteffect: zkCalendars.closeFloats,
 				endeffect: zkCalendars._enddrag,
@@ -168,15 +177,7 @@ zkCalendars = {
 			});
 
 			// a trick for dragdrop.js
-		  var daylong = $e(cmp, "daylong");
 			daylong._skipped = true;
-		  zk.listen(daylong, 'click', function(evt) {
-        if (!zk.dragging && !zkau.processing()) {
-				  zkCalendars.clearGhost(cmp);
-				  zkCalendars.onDaylongClick(daylong, evt);
-        } else
-        Event.stop(evt);
-		  });
 			zkCalendars._drag[daylong.id] = new zDraggable(daylong, {
 				starteffect: zkCalendars.closeFloats,
 				endeffect: zkCalendars._endDaylongDrag,
@@ -758,17 +759,18 @@ zkCalendars = {
 		}
 	},
 	onClick: function (cnt, evt) {
-		var cmp = $outer(cnt),
-			p = Event.pointer(evt);
-
+		var cmp = $outer(cnt);
+    zkCalendars.clearGhost(cmp);
+		
+    var p = Event.pointer(evt);
 		if (!cnt._lefts || p[0] <= cnt._lefts[0]) return;
 
 		var ce = zkCalendars._getCalevent(evt, cnt);
-		if (ce) {
+		if (ce) { // click on an event
 			zkau.send({uuid: cmp.id, cmd: "onEventEdit", data: [ce.id,
 				p[0], p[1], zk.innerWidth(),
 				zk.innerHeight()]}, 100);
-		} else {
+		} else if (!getZKAttr(cmp, "readonly")) { // start a new event
 			var ts = $int(getZKAttr(cmp, "ts")),
 				row = zk.ie ? cnt.firstChild.rows[0].cells[0].firstChild.rows[1] :
 						cnt.firstChild.rows[1],
@@ -839,14 +841,16 @@ zkCalendars = {
 		Event.stop(evt);
 	},
 	onDaylongClick: function (daylong, evt) {
+		var cmp = $outer(daylong);
+	  zkCalendars.clearGhost(cmp);
+
 		var ce = zkCalendars._getCalevent(evt, daylong);
-		if (ce) {
+		if (ce) { // click on an event
 			zkau.send({uuid: $uuid(daylong), cmd: "onEventEdit", data: [ce.id,
 				Event.pointerX(evt), Event.pointerY(evt), zk.innerWidth(),
 				zk.innerHeight()]}, 100);
-		} else {
-			var cmp = $outer(daylong),
-				zcls = getZKAttr(cmp, 'zcls'),
+		} else if (!getZKAttr(cmp, "readonly")) { // start a new event
+				var zcls = getZKAttr(cmp, 'zcls'),
 				html = '<div id="'+ cmp.id + '!rope" class="' + zcls + '-daylong-dd">'
 					 + '<div class="' + zcls + '-dd-rope"></div></div>';
 
@@ -1362,15 +1366,15 @@ zkCalendarsMonth = {
 		} // for (var ri = 0, n = cnt.firstChild;
 		cmp._evtsData = rdata;
 
-		if (!getZKAttr(cmp, "readonly")) {
-			zk.listen(cnt, 'click', function(evt) {
-				if (!zk.dragging && !zkau.processing()) {
-					zkCalendarsMonth.clearGhost(cmp);
-					zkCalendarsMonth.onClick(cnt, evt);
-				} else
-					Event.stop(evt);
-			});
+		// Support for click on event in readonly mode, too. xmedeko 25.2.2010
+		zk.listen(cnt, 'click', function(evt) {
+			if (!zk.dragging && !zkau.processing()) {
+				zkCalendarsMonth.onClick(cnt, evt);
+			} else
+				Event.stop(evt);
+		});
 
+		if (!getZKAttr(cmp, "readonly")) {
 			// a trick for dragdrop.js
 			cnt._skipped = true;
 			zkCalendarsMonth._drag[cnt.id] = new zDraggable(cnt, {
@@ -1385,6 +1389,9 @@ zkCalendarsMonth = {
 		}
 	},
 	onClick: function (cnt, evt) {
+		var cmp = $outer(cnt);
+		zkCalendarsMonth.clearGhost(cmp);
+
 		var ce;
 		for (var n = Event.element(evt); n && n != cnt; n = n.parentNode) {
 			if ($tag(n) == 'TR' && n.id.indexOf('!frow') > 0)
@@ -1394,13 +1401,12 @@ zkCalendarsMonth = {
 				break;
 			}
 		}
-		if (ce) {
+		if (ce) { // click on an event
 			zkau.send({uuid: $uuid(cnt), cmd: "onEventEdit", data: [ce.id,
 				Event.pointerX(evt), Event.pointerY(evt), zk.innerWidth(),
 				zk.innerHeight()]}, 100);
-		} else {
-			var cmp = $outer(cnt),
-				zcls = getZKAttr(cmp, "zcls"),
+		} else if (!getZKAttr(cmp, "readonly")) { // create a new event
+				var zcls = getZKAttr(cmp, "zcls");
 				html = '<div id="' + cmp.id + '!rope" class="' + zcls + '-month-dd">'
 					 + '<div class="' + zcls + '-dd-rope"></div></div>';
 
