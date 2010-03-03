@@ -27,11 +27,14 @@ import org.zkoss.calendar.api.DateFormatter;
 import org.zkoss.calendar.api.EventRender;
 import org.zkoss.lang.Strings;
 import org.zkoss.util.Locales;
+import org.zkoss.xml.XMLs;
+
 
 /**
  * A simple implementation of {@link EventRender}.
+ *  
  * @author jumperchen
- *
+ * @author xmedeko - small improvements
  */
 public class SimpleEventRender implements EventRender, Serializable {
 	private static final long serialVersionUID = 1L;
@@ -54,6 +57,7 @@ public class SimpleEventRender implements EventRender, Serializable {
 		}
 		// trim it
 		title = title.trim();
+		// trim it to maxchars, if param maxchars is greater that zero
 		if (maxchars > 0 && title.length() > maxchars) {
 			title = title.substring(0, maxchars);
 		}
@@ -121,18 +125,12 @@ public class SimpleEventRender implements EventRender, Serializable {
 				.append(headerStyle)
 				.append(">");
 
-		String title = self.getTitle();
-		if (Strings.isEmpty(title)) {
-			DateFormatter df = cal.getDateFormatter();
-			Locale locale = Locales.getCurrent();
-			TimeZone timezone = cal.getDefaultTimeZone();
-			if (eventEnd.getTime() - eventBegin.getTime() < 60 * 60 * 1000) {
-				title = df.getCaptionByTimeOfDay(eventBegin, locale, timezone) + " - " + self.getContent();
-			} else
-				title = df.getCaptionByTimeOfDay(eventBegin, locale, timezone) + " - "
+		// header
+		DateFormatter df = cal.getDateFormatter();
+		Locale locale = Locales.getCurrent();
+		TimeZone timezone = cal.getDefaultTimeZone();
+		String timeStr = df.getCaptionByTimeOfDay(eventBegin, locale, timezone) + " - "
 						+ df.getCaptionByTimeOfDay(eventEnd, locale, timezone);
-		}
-		// title
 		wh.append("<dl id=\"")
 				.append(id)
 				.append("!inner\"")
@@ -144,7 +142,7 @@ public class SimpleEventRender implements EventRender, Serializable {
 				.append("\"")
 				.append(headerStyle)
 				.append(">")
-				.append(title)
+				.append(timeStr)
 				.append("</dt>");
 
 		// content
@@ -156,9 +154,8 @@ public class SimpleEventRender implements EventRender, Serializable {
 				.append(contentStyle)
 				.append("><div class=\"")
 				.append(text)
-				.append("\">")
-				.append(self.getContent())
-				.append("</div></dd>");
+				.append("\">");
+		XMLs.encodeText(wh, getTitle(self, 200)).append("</div></dd>");
 
 		// resizer
 		if (!cal.isReadonly() && !self.isLocked()) {
@@ -279,7 +276,8 @@ public class SimpleEventRender implements EventRender, Serializable {
 		if (isAfter)
 			wh.append("<div class=\"").append(right_arrow_icon).append("\"").append(arrowStyle).append(">&nbsp;</div>");
 
-		wh.append("<div class=\"").append(text).append("\">").append(getTitle(self, 50)).append("</div>");
+		wh.append("<div class=\"").append(text).append("\">");
+		XMLs.encodeText(wh, getTitle(self, 50)).append("</div>");
 
 		wh.append("</div>");
 
@@ -401,7 +399,8 @@ public class SimpleEventRender implements EventRender, Serializable {
 			wh.append("<div class=\"").append(left_arrow_icon).append("\"").append(arrowStyle).append(">&nbsp;</div>");
 		if (isAfter)
 			wh.append("<div class=\"").append(right_arrow_icon).append("\"").append(arrowStyle).append(">&nbsp;</div>");
-		wh.append("<div class=\"").append(text).append("\">").append(getTitle(self, 25)).append("</div>");
+		wh.append("<div class=\"").append(text).append("\">");
+		XMLs.encodeText(wh, getTitle(self, 50)).append("</div>");
 
 		wh.append("</div>");
 
@@ -471,9 +470,8 @@ public class SimpleEventRender implements EventRender, Serializable {
 				.append(content)
 				.append("\"")
 				.append(contentStyle)
-				.append(">")
-				.append(getTitle(self, 25))
-				.append("</span>");
+				.append(">");
+		XMLs.encodeText(wh, getTitle(self, 25)).append("</span>");
 
 		wh.append("</div>");
 		return wh.toString();
