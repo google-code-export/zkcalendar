@@ -487,7 +487,11 @@ zkCalendars = {
 		if (dg && dg._zdata) {
 			clearInterval(zkCalendars.run);
 			var cmp = $outer(cnt);
-			if (dg._zrz) {
+			if (isNaN(Event.pointerX(evt))) {
+				zk.remove($e(cmp.id, 'dd'));
+				zkCalendars._ignoreClick = true;
+				return;
+			}else if (dg._zrz) {
 				if (dg._zdata.dur) {
 					var ce = dg._zevt,
 						bd = new Date($int(getZKAttr(ce, "bd"))),
@@ -744,6 +748,11 @@ zkCalendars = {
 		}
 	},
 	onClick: function (cnt, evt) {
+		if (zkCalendars._ignoreClick) {
+			zkCalendars._ignoreClick = false;
+			return;
+		}
+		
 		var cmp = $outer(cnt),
 			p = Event.pointer(evt);
 
