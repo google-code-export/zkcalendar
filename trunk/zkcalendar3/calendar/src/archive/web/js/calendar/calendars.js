@@ -688,9 +688,11 @@ zkCalendars = {
 	_endDaylongDrag: function (daylong, evt) {
 		var dg = zkCalendars._drag[daylong.id];
 		if (dg) {
-
 			var cmp = $outer(daylong), ce;
-			if (dg._zevt) {
+			if (isNaN(Event.pointerX(evt))) {
+				zk.remove($e(cmp.id, "rope"));
+				return;
+			}else if (dg._zevt) {
 					var zcls = getZKAttr(cmp, 'zcls'),
 					tzOffset = $int(getZKAttr(cmp, "tz")),
 					bd = zkCalendars.fixTimeZoneFromServer(
@@ -1662,7 +1664,10 @@ zkCalendarsMonth = {
 		var dg = zkCalendarsMonth._drag[cnt.id];
 		if (dg) {
 			var cmp = $outer(cnt), ce;
-			if (dg._zevt) {
+			if (isNaN(Event.pointerX(evt))) {
+				zk.remove($e(cmp.id, "rope"));
+				return;
+			}else if (dg._zevt) {
 				var zcls = getZKAttr(cmp, 'zcls'),
 					tzOffset = $int(getZKAttr(cmp, "tz")),
 					bd = zkCalendars.fixTimeZoneFromServer(
