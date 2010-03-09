@@ -63,6 +63,28 @@ public class SimpleEventRender implements EventRender, Serializable {
 		}
 		return title;
 	}
+	
+	/** 
+	 * This method is missing in {@link XMLs}, unfortunatelly. 
+	 * @param sb String Buffer where to write to.
+	 * @param s String to escape.
+	 * 
+	 * @return {@code sb} parameter.
+	 * 
+	 * @see XMLs#escapeXML(char)
+	 */
+	public static StringBuffer escapeXML(StringBuffer sb, String s) {
+		if (s == null) return sb; // nothing to do
+		
+		for (int j = 0, len = s.length(); j < len; ++j) {
+			final char cc = s.charAt(j);
+			final String esc = XMLs.escapeXML(cc);
+			if (esc != null) sb.append(esc);
+			else sb.append(cc);
+		}
+		
+		return sb;
+	} 
 
 	public String drawDay(Calendars cal, CalendarEvent self, String id) {
 		final String headerColor = self.getHeaderColor();
@@ -155,7 +177,7 @@ public class SimpleEventRender implements EventRender, Serializable {
 				.append("><div class=\"")
 				.append(text)
 				.append("\">");
-		XMLs.encodeText(wh, getTitle(self, 200)).append("</div></dd>");
+		escapeXML(wh, getTitle(self, 200)).append("</div></dd>");
 
 		// resizer
 		if (!cal.isReadonly() && !self.isLocked()) {
@@ -277,7 +299,7 @@ public class SimpleEventRender implements EventRender, Serializable {
 			wh.append("<div class=\"").append(right_arrow_icon).append("\"").append(arrowStyle).append(">&nbsp;</div>");
 
 		wh.append("<div class=\"").append(text).append("\">");
-		XMLs.encodeText(wh, getTitle(self, 50)).append("</div>");
+		escapeXML(wh, getTitle(self, 50)).append("</div>");
 
 		wh.append("</div>");
 
@@ -400,7 +422,7 @@ public class SimpleEventRender implements EventRender, Serializable {
 		if (isAfter)
 			wh.append("<div class=\"").append(right_arrow_icon).append("\"").append(arrowStyle).append(">&nbsp;</div>");
 		wh.append("<div class=\"").append(text).append("\">");
-		XMLs.encodeText(wh, getTitle(self, 50)).append("</div>");
+		escapeXML(wh, getTitle(self, 50)).append("</div>");
 
 		wh.append("</div>");
 
@@ -471,7 +493,7 @@ public class SimpleEventRender implements EventRender, Serializable {
 				.append("\"")
 				.append(contentStyle)
 				.append(">");
-		XMLs.encodeText(wh, getTitle(self, 25)).append("</span>");
+		escapeXML(wh, getTitle(self, 25)).append("</span>");
 
 		wh.append("</div>");
 		return wh.toString();
