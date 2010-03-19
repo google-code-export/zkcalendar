@@ -711,7 +711,7 @@ public class Calendars extends XulElement implements
 		
 		// the unit of the offset in Javascript is minute
 		TimeZone tz = getDefaultTimeZone();
-		HTMLs.appendAttribute(sb, "z.tz", (tz.getRawOffset() + (tz.useDaylightTime() ? tz.getDSTSavings() : 0))/60000);
+		HTMLs.appendAttribute(sb, "z.tz", (tz.getRawOffset() + (tz.inDaylightTime(Calendar.getInstance(tz).getTime()) ? tz.getDSTSavings() : 0))/60000);
 		return sb.toString();
 	}
 	//Cloneable//
