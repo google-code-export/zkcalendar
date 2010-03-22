@@ -697,8 +697,16 @@ public class Calendars extends XulElement implements
 		} else
 			HTMLs.appendAttribute(sb, "z.ts", _tzones.size());
 		
-		HTMLs.appendAttribute(sb, "z.bd", getBeginDate().getTime());
-		HTMLs.appendAttribute(sb, "z.ed", getEndDate().getTime());
+		final Date eventBegin = getBeginDate();
+		final Date eventEnd = getEndDate();
+
+		TimeZone tz = getDefaultTimeZone();
+		final long DSTSavings = tz.getDSTSavings();
+		final long bdDSTOffset = tz.inDaylightTime(eventBegin) ? DSTSavings: 0;
+		final long edDSTOffset = tz.inDaylightTime(eventEnd) ? DSTSavings: 0;		
+		
+		HTMLs.appendAttribute(sb, "z.bd", getBeginDate().getTime() + bdDSTOffset);
+		HTMLs.appendAttribute(sb, "z.ed", getEndDate().getTime() + edDSTOffset);
 
 		if (_readonly)
 			HTMLs.appendAttribute(sb, "z.readonly", true);
@@ -709,9 +717,8 @@ public class Calendars extends XulElement implements
 		appendAsapAttr(sb, "onDayClick");
 		appendAsapAttr(sb, "onWeekClick");
 		
-		// the unit of the offset in Javascript is minute
-		TimeZone tz = getDefaultTimeZone();
-		HTMLs.appendAttribute(sb, "z.tz", (tz.getRawOffset() + (tz.inDaylightTime(Calendar.getInstance(tz).getTime()) ? tz.getDSTSavings() : 0))/60000);
+		// the unit of the offset in Javascript is minute		
+		HTMLs.appendAttribute(sb, "z.tz", tz.getRawOffset()/60000);
 		return sb.toString();
 	}
 	//Cloneable//
