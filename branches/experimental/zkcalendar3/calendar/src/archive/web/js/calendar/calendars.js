@@ -511,7 +511,11 @@ zkCalendars = {
 		if (dg && dg._zdata) {
 			clearInterval(zkCalendars.run);
 			var cmp = $outer(cnt);
-			if (dg._zrz) { // resize
+			if (isNaN(Event.pointerX(evt))) {
+				zk.remove($e(cmp.id, 'dd'));
+				zkCalendars._ignoreClick = true;
+				return;
+			} else if (dg._zrz) { // resize
 				if (dg._zdata.dur) {
 					var ce = dg._zevt,
 						ofs = zkCalendars._getTimeOffset(ce._ed, dg._zdata.dur);
@@ -699,9 +703,11 @@ zkCalendars = {
 	_endDaylongDrag: function (daylong, evt) {
 		var dg = zkCalendars._drag[daylong.id];
 		if (dg) {
-
 			var cmp = $outer(daylong), ce;
-			if (dg._zevt) {
+			if (isNaN(Event.pointerX(evt))) {
+				zk.remove($e(cmp.id, "rope"));
+				return;
+			} else if (dg._zevt) {
 					var zcls = getZKAttr(cmp, 'zcls'),
 					tzOffset = $int(getZKAttr(cmp, "tz")),
 					bd = zkCalendars.fixTimeZoneFromServer(
@@ -759,10 +765,15 @@ zkCalendars = {
 		}
 	},
 	onClick: function (cnt, evt) {
-		var cmp = $outer(cnt);
-    zkCalendars.clearGhost(cmp);
+		if (zkCalendars._ignoreClick) {
+			zkCalendars._ignoreClick = false;
+			return;
+		}
 		
-    var p = Event.pointer(evt);
+		var cmp = $outer(cnt);
+		zkCalendars.clearGhost(cmp);
+		
+		var p = Event.pointer(evt);
 		if (!cnt._lefts || p[0] <= cnt._lefts[0]) return;
 
 		var ce = zkCalendars._getCalevent(evt, cnt);
@@ -1687,7 +1698,10 @@ zkCalendarsMonth = {
 		var dg = zkCalendarsMonth._drag[cnt.id];
 		if (dg) {
 			var cmp = $outer(cnt), ce;
-			if (dg._zevt) {
+			if (isNaN(Event.pointerX(evt))) {
+				zk.remove($e(cmp.id, "rope"));
+				return;
+			} else if (dg._zevt) {
 				var zcls = getZKAttr(cmp, 'zcls'),
 					tzOffset = $int(getZKAttr(cmp, "tz")),
 					bd = zkCalendars.fixTimeZoneFromServer(
