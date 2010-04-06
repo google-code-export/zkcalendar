@@ -17,6 +17,8 @@ Copyright (C) 2009 Potix Corporation. All Rights Reserved.
 package org.zkoss.calendar.au.in;
 
 import java.util.Date;
+import java.util.TimeZone;
+
 import org.zkoss.calendar.Calendars;
 import org.zkoss.calendar.api.CalendarEvent;
 import org.zkoss.calendar.event.CalendarsEvent;
@@ -49,9 +51,19 @@ public class CaleventUpdateCommand extends Command {
 			throw new UiException(MZk.ILLEGAL_REQUEST_WRONG_DATA, new Object[] {
 					Objects.toString(data), this });
 		CalendarEvent ce = cmp.getCalendarEventById(data[0]);
+		TimeZone tz = cmp.getDefaultTimeZone();
+		Date eventBegin = new Date(Long.parseLong(data[1]));
+		Date eventEnd = new Date(Long.parseLong(data[2]));
+		if (tz.inDaylightTime(eventBegin))
+			eventBegin = new Date(eventBegin.getTime() - tz.getDSTSavings());
+		if (tz.inDaylightTime(eventEnd))
+			eventEnd = new Date(eventEnd.getTime() - tz.getDSTSavings());
+		
+		
+		
 		if (ce != null)
-			Events.postEvent(new CalendarsEvent(getId(), cmp, ce, new Date(Long
-				.parseLong(data[1])), new Date(Long.parseLong(data[2])),
+			Events.postEvent(new CalendarsEvent(getId(), cmp, ce, 
+				eventBegin, eventEnd,
 				Integer.parseInt(data[3]), Integer.parseInt(data[4]), Integer
 						.parseInt(data[5]), Integer.parseInt(data[6])));
 	}
