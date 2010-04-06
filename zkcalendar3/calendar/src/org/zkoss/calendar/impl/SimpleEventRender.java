@@ -63,7 +63,7 @@ public class SimpleEventRender implements EventRender, Serializable {
 		}
 		return title;
 	}
-	
+
 	/** 
 	 * This method is missing in {@link XMLs}, unfortunatelly. 
 	 * @param sb String Buffer where to write to.
@@ -75,14 +75,14 @@ public class SimpleEventRender implements EventRender, Serializable {
 	 */
 	public static StringBuffer escapeXML(StringBuffer sb, String s) {
 		if (s == null) return sb; // nothing to do
-		
+
 		for (int j = 0, len = s.length(); j < len; ++j) {
 			final char cc = s.charAt(j);
 			final String esc = XMLs.escapeXML(cc);
 			if (esc != null) sb.append(esc);
 			else sb.append(cc);
 		}
-		
+
 		return sb;
 	} 
 
@@ -94,6 +94,11 @@ public class SimpleEventRender implements EventRender, Serializable {
 
 		final Date eventBegin = self.getBeginDate();
 		final Date eventEnd = self.getEndDate();
+
+		final TimeZone timezone = cal.getDefaultTimeZone();
+		final long DSTSavings = timezone.getDSTSavings();
+		final long bdDSTOffset = timezone.inDaylightTime(eventBegin) ? DSTSavings : 0;
+		final long edDSTOffset = timezone.inDaylightTime(eventEnd) ? DSTSavings : 0;
 
 		// CSS ClassName
 		final String zcls = self.getZclass();
@@ -115,8 +120,8 @@ public class SimpleEventRender implements EventRender, Serializable {
 		StringBuffer wh = new StringBuffer();
 		wh.append("<div id=\"").append(id).append("\" z.type=\"Calevent\" class=\"").append(zcls).append("\"");
 		wh.append(" z.zcls=\"").append(zcls).append("\"");
-		wh.append(" z.bd=\"").append(eventBegin.getTime()).append("\"");
-		wh.append(" z.ed=\"").append(eventEnd.getTime()).append("\"");
+		wh.append(" z.bd=\"").append(eventBegin.getTime()+ bdDSTOffset).append("\"");
+		wh.append(" z.ed=\"").append(eventEnd.getTime() + edDSTOffset).append("\"");
 		if (self.isLocked())
 			wh.append(" z.locked=\"true\"");
 
@@ -150,7 +155,6 @@ public class SimpleEventRender implements EventRender, Serializable {
 		// header
 		DateFormatter df = cal.getDateFormatter();
 		Locale locale = Locales.getCurrent();
-		TimeZone timezone = cal.getDefaultTimeZone();
 		String timeStr = df.getCaptionByTimeOfDay(eventBegin, locale, timezone) + " - "
 						+ df.getCaptionByTimeOfDay(eventEnd, locale, timezone);
 		wh.append("<dl id=\"")
@@ -215,10 +219,17 @@ public class SimpleEventRender implements EventRender, Serializable {
 		final String arrowStyle = Strings.isBlank(contentColor) ? "" : "style=\"border-bottom-color:" + contentColor
 				+ ";border-top-color:" + contentColor + "\"";
 
+
 		final Date eventBegin = self.getBeginDate();
 		final Date eventEnd = self.getEndDate();
 		final Date calBegin = cal.getBeginDate();
 		final Date calEnd = cal.getEndDate();
+
+		final TimeZone timezone = cal.getDefaultTimeZone();
+		final long DSTSavings = timezone.getDSTSavings();
+		final long bdDSTOffset = timezone.inDaylightTime(eventBegin) ? DSTSavings : 0;
+		final long edDSTOffset = timezone.inDaylightTime(eventEnd) ? DSTSavings : 0;
+
 
 		// CSS ClassName
 		final String zcls = self.getZclass();
@@ -247,8 +258,8 @@ public class SimpleEventRender implements EventRender, Serializable {
 				.append("\"");
 		wh.append(" z.zcls=\"").append(zcls).append("\"");
 
-		wh.append(" z.bd=\"").append(eventBegin.getTime()).append("\"");
-		wh.append(" z.ed=\"").append(eventEnd.getTime()).append("\"");
+		wh.append(" z.bd=\"").append(eventBegin.getTime() + bdDSTOffset).append("\"");
+		wh.append(" z.ed=\"").append(eventEnd.getTime() + edDSTOffset).append("\"");
 		wh.append(" z.hc=\"").append(headerColor).append("\"");
 		wh.append(" z.cc=\"").append(contentColor).append("\"");
 		if (self.isLocked())
@@ -333,9 +344,14 @@ public class SimpleEventRender implements EventRender, Serializable {
 				+ contentColor + ";border-right-color:" + contentColor + "\"";
 		final String arrowStyle = isContentBlank ? "" : "style=\"border-bottom-color:" + contentColor
 				+ ";border-top-color:" + contentColor + "\"";
-		
+
 		final Date eventBegin = self.getBeginDate();
 		final Date eventEnd = self.getEndDate();
+
+		final TimeZone timezone = cal.getDefaultTimeZone();
+		final long DSTSavings = timezone.getDSTSavings();
+		final long bdDSTOffset = timezone.inDaylightTime(eventBegin) ? DSTSavings : 0;
+		final long edDSTOffset = timezone.inDaylightTime(eventEnd) ? DSTSavings : 0;
 
 		// CSS ClassName
 		final String zcls = self.getZclass();
@@ -369,8 +385,8 @@ public class SimpleEventRender implements EventRender, Serializable {
 				.append("\"");
 		wh.append(" z.zcls=\"").append(zcls).append("\"");
 
-		wh.append(" z.bd=\"").append(eventBegin.getTime()).append("\"");
-		wh.append(" z.ed=\"").append(eventEnd.getTime()).append("\"");
+		wh.append(" z.bd=\"").append(eventBegin.getTime() + bdDSTOffset).append("\"");
+		wh.append(" z.ed=\"").append(eventEnd.getTime() + edDSTOffset).append("\"");
 		wh.append(" z.hc=\"").append(headerColor).append("\"");
 		wh.append(" z.cc=\"").append(contentColor).append("\"");
 		if (self.isLocked())
@@ -456,6 +472,11 @@ public class SimpleEventRender implements EventRender, Serializable {
 		final Date eventBegin = self.getBeginDate();
 		final Date eventEnd = self.getEndDate();
 
+		final TimeZone timezone = cal.getDefaultTimeZone();
+		final long DSTSavings = timezone.getDSTSavings();
+		final long bdDSTOffset = timezone.inDaylightTime(eventBegin) ? DSTSavings : 0;
+		final long edDSTOffset = timezone.inDaylightTime(eventEnd) ? DSTSavings : 0;
+
 		// CSS ClassName
 		final String zcls = self.getZclass();
 		final String month = zcls + "-month";
@@ -467,8 +488,8 @@ public class SimpleEventRender implements EventRender, Serializable {
 		wh.append("<div id=\"").append(id).append("\" z.type=\"Calevent\" class=\"").append(zcls).append(" ").append(
 				month).append("\"");
 		wh.append(" z.zcls=\"").append(zcls).append("\"");
-		wh.append(" z.bd=\"").append(eventBegin.getTime()).append("\"");
-		wh.append(" z.ed=\"").append(eventEnd.getTime()).append("\"");
+		wh.append(" z.bd=\"").append(eventBegin.getTime() + bdDSTOffset).append("\"");
+		wh.append(" z.ed=\"").append(eventEnd.getTime() + edDSTOffset).append("\"");
 		if (self.isLocked())
 			wh.append(" z.locked=\"true\"");
 
