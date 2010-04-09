@@ -37,6 +37,7 @@ import org.zkoss.xml.XMLs;
  */
 public class SimpleEventRender implements EventRender, Serializable {
 	private static final long serialVersionUID = 1L;
+	private boolean _escapeXML = false;
 	
 	/** 
 	 * This method is missing in {@link XMLs}, unfortunatelly. 
@@ -49,7 +50,6 @@ public class SimpleEventRender implements EventRender, Serializable {
 	 */
 	public static StringBuffer escapeXML(StringBuffer sb, String s) {
 		if (s == null) return sb; // nothing to do
-		
 		for (int j = 0, len = s.length(); j < len; ++j) {
 			final char cc = s.charAt(j);
 			final String esc = XMLs.escapeXML(cc);
@@ -59,6 +59,7 @@ public class SimpleEventRender implements EventRender, Serializable {
 		
 		return sb;
 	}
+	
 	public String drawDay(Calendars cal, CalendarEvent self, String id) {
 		final String headerColor = self.getHeaderColor();
 		final String contentColor = self.getContentColor();
@@ -166,7 +167,12 @@ public class SimpleEventRender implements EventRender, Serializable {
 				.append("><div class=\"")
 				.append(text)
 				.append("\">");
-		escapeXML(wh, self.getContent()).append("</div></dd>");
+		
+		if (this._escapeXML)
+			escapeXML(wh, self.getContent()).append("</div></dd>");
+		else
+			wh.append(self.getContent()).append("</div></dd>");
+		
 
 		// resizer
 		if (!self.isLocked())
@@ -291,7 +297,10 @@ public class SimpleEventRender implements EventRender, Serializable {
 			wh.append("<div class=\"").append(right_arrow_icon).append("\"")
 			.append(arrowStyle).append(">&nbsp;</div>");
 		wh.append("<div class=\"").append(text).append("\">");
-		escapeXML(wh, self.getContent()).append("</div>");
+		if (this._escapeXML)
+			escapeXML(wh, self.getContent()).append("</div>");
+		else
+			wh.append(self.getContent()).append("</div>");
 
 		wh.append("</div>");
 
@@ -417,7 +426,10 @@ public class SimpleEventRender implements EventRender, Serializable {
 		if (isAfter)
 			wh.append("<div class=\"").append(right_arrow_icon).append("\"").append(arrowStyle).append(">&nbsp;</div>");
 		wh.append("<div class=\"").append(text).append("\">");
-		escapeXML(wh, self.getContent()).append("</div>");
+		if (this._escapeXML)
+			escapeXML(wh, self.getContent()).append("</div>");
+		else
+			wh.append(self.getContent()).append("</div>");
 
 		wh.append("</div>");
 
@@ -493,10 +505,28 @@ public class SimpleEventRender implements EventRender, Serializable {
 				.append("\"")
 				.append(contentStyle)
 				.append(">");
-		escapeXML(wh, self.getContent()).append("</span>");
-
+		if (this._escapeXML)
+			escapeXML(wh, self.getContent()).append("</span>");
+		else
+			wh.append(self.getContent()).append("</span>");
+		
 		wh.append("</div>");
 		return wh.toString();
+	}
+
+	/**
+	 * Sets whether the event content escape XML
+	 * @param escapeXML
+	 */
+	public void setEscapeXML(boolean escapeXML) {
+		this._escapeXML = escapeXML;
+	}
+	/**
+	 * Return whether the event content escape XML
+	 * @return boolean
+	 */
+	public boolean isEscapeXML() {
+		return _escapeXML;
 	}
 
 }
