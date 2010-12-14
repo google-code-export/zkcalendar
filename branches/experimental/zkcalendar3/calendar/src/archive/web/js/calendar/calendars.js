@@ -12,7 +12,7 @@ Copyright (C) 2009 Potix Corporation. All Rights Reserved.
 This program is distributed under GPL Version 2.0 in the hope that
 it will be useful, but WITHOUT ANY WARRANTY.
 */
-zk.load("calendar.lang.msgcal*"); 
+//zk.load("calendar.lang.msgcal*"); 
 
 var _zkdd = {};
 zk.override(zDraggable.prototype, "initDrag",  _zkdd, function (event) {
@@ -211,17 +211,19 @@ zkCalendars = {
 	},
 	// content dragdrop
 	_ignoredrag: function (cnt, p, evt) {
-		if (zkau.processing() || !cnt._lefts || p[0] <= cnt._lefts[0] || p[0] > cnt._lefts[cnt._lefts.length-1])
+		if (zkau.processing() || !zkCalendars._drag[cnt.id] || !cnt._lefts || p[0] <= cnt._lefts[0] || p[0] > cnt._lefts[cnt._lefts.length-1]) {
 			return true;
+    }
 
 		// clear ghost
 		zkCalendars.clearGhost($outer(cnt));
+	    zkCalendars._drag[cnt.id]._zrz = false;
+    
 		for (var n = Event.element(evt); n && n != cnt; n = n.parentNode) {
 			if ($type(n) == 'Calevent' && (!n.parentNode || getZKAttr(n, 'locked') == "true"))
 				return true;
-			else if (n.nodeType == 1 && zk.hasClass(n, "z-calevent-resizer")) {
-				if (zkCalendars._drag[cnt.id])
-					zkCalendars._drag[cnt.id]._zrz = true;
+			if (n.nodeType == 1 && zk.hasClass(n, "z-calevent-resizer")) {
+				zkCalendars._drag[cnt.id]._zrz = true;
 			}
 		}
 		return false;
@@ -236,7 +238,6 @@ zkCalendars = {
 					: cnt.firstChild.rows[1],
 				cells = row.cells,
 				ph = row.firstChild.firstChild.offsetHeight/2;
-
 			dg._zcells = cells;
 			dg._zoffs = zk.revisedOffset(cnt);
 			dg._zoffs = {
@@ -386,16 +387,15 @@ zkCalendars = {
 		}
 
 		// fix scroll bar
+		clearInterval(zkCalendars.run);
 		var move = 0, steps;
 		if (y - ph < y1) {
-			clearInterval(zkCalendars.run);
 			move = dg.handle.scrollTop;
 			steps = ph;
 		} else if (y + ph > y1 + h1) {
-			clearInterval(zkCalendars.run);
 			move = dg.handle.scrollHeight - dg.handle.scrollTop - dg.handle.offsetHeight;
 			steps = -ph;
-		} else clearInterval(zkCalendars.run);
+		}
 
 		if (move > 0)
 			zkCalendars.run = setInterval(function() {
@@ -508,31 +508,33 @@ zkCalendars = {
 	},
 	_enddrag: function (cnt, evt) {
 		var dg = zkCalendars._drag[cnt.id];
-		if (dg && dg._zdata) {
-			clearInterval(zkCalendars.run);
-			var cmp = $outer(cnt);
-			if (isNaN(Event.pointerX(evt))) {
-				zk.remove($e(cmp.id, 'dd'));
-				zkCalendars._ignoreClick = true;
-				return;
-			} else if (dg._zrz) { // resize
+		if (!dg || !dg._zdata)
+			return;
+		// dg and dg._zdata are defined
+		clearInterval(zkCalendars.run);
+		var cmp = $outer(cnt);
+		if (isNaN(Event.pointerX(evt))) {
+			zk.remove($e(cmp.id, 'dd'));
+			zkCalendars._ignoreClick = true;
+			return;
+		}
+		if (dg._zevt) { // move or rezise
+			if (dg._zrz) { // resize
 				if (dg._zdata.dur) {
 					var ce = dg._zevt,
-						ofs = zkCalendars._getTimeOffset(ce._ed, dg._zdata.dur);
-
+					ofs = zkCalendars._getTimeOffset(ce._ed, dg._zdata.dur);
 					zkau.send({
 						uuid: cmp.id,
 						cmd: "onEventUpdate",
 						data: [
-							ce.id,
-							$int(getZKAttr(ce, "bd")),
-							$int(getZKAttr(ce, "ed")) - ofs,
-							Event.pointerX(evt),
-							Event.pointerY(evt),
-							zk.innerWidth(),
-							zk.innerHeight()]
+						       ce.id,
+						       $int(getZKAttr(ce, "bd")),
+						       $int(getZKAttr(ce, "ed")) - ofs,
+						       Event.pointerX(evt),
+						       Event.pointerY(evt),
+						       zk.innerWidth(),
+						       zk.innerHeight()]
 					}, 100);
-
 					zkCalendars._ghost[cmp.id] = function () {
 						ce = $e(ce);
 						if (ce)
@@ -544,23 +546,22 @@ zkCalendars = {
 					dg._zevt.style.visibility = "";
 					zk.remove($e(cmp.id, 'dd'));
 				}
-			} else if (dg._zevt) { // move
+			} else { // move
 				var ce = dg._zevt,
-					ofs = zkCalendars._getTimeOffset(ce._bd, -dg._zdata.rows) + dg._zdata.cols * 86400000; // 86400000 = 1 day in ms
+				ofs = zkCalendars._getTimeOffset(ce._bd, -dg._zdata.rows) + dg._zdata.cols * 86400000; // 86400000 = 1 day in ms
 				if (ofs) {
 					zkau.send({
 						uuid: cmp.id,
 						cmd: "onEventUpdate",
 						data: [
-							ce.id,
-							$int(getZKAttr(ce, "bd")) - ofs,
-							$int(getZKAttr(ce, "ed")) - ofs,
-							Event.pointerX(evt),
-							Event.pointerY(evt),
-							zk.innerWidth(),
-							zk.innerHeight()]
+						       ce.id,
+						       $int(getZKAttr(ce, "bd")) - ofs,
+						       $int(getZKAttr(ce, "ed")) - ofs,
+						       Event.pointerX(evt),
+						       Event.pointerY(evt),
+						       zk.innerWidth(),
+						       zk.innerHeight()]
 					}, 100);
-
 
 					zkCalendars._ghost[cmp.id] = function () {
 						ce = $e(ce);
@@ -573,32 +574,30 @@ zkCalendars = {
 					dg._zevt.style.visibility = "";
 					zk.remove($e(cmp.id, 'dd'));
 				}
-			} else { // new event
-				var cols = dg._zdata.cols,
-					rows = dg._zdata.rows,
-					dur = dg._zdata.dur + rows,
-					days = cols * zkCalendars.DAYTIME,
-					cmp = $outer(cnt),
-					tzOffset = $int(getZKAttr(cmp, "tz")),
-					bd = new Date($int(getZKAttr(cmp, "bd")) + days),
-					bd1 = zkCalendars.fixTimeZoneFromServer(bd, tzOffset),
-					ofs = zkCalendars._getTimeOffset(bd1, false, rows),
-					ofs1 = zkCalendars._getTimeOffset(bd1, false, dur);
-
-				zkau.send({uuid: cmp.id, cmd: "onEventCreate", data: [bd.getTime() + ofs,
-					bd.getTime() + ofs1, Event.pointerX(evt), Event.pointerY(evt),
-					zk.innerWidth(), zk.innerHeight()]}, 100);
-
-
-				zkCalendars._ghost[cmp.id] = function () {
-					zk.remove($e(cmp.id, 'dd'));
-					delete zkCalendars._ghost[cmp.id];
-				};
 			}
-			// fix opera jumping
-			if (zk.opera) cnt.scrollTop = zkCalendars._scrollInfo[cmp.id];
-			dg._zchanged = dg._zecnt = dg._zrzoffs = dg._zrs = dg._zdata = dg._zcells = dg._zoffs = dg._zevt = null;
+		} else { // new event
+			var cols = dg._zdata.cols,
+				rows = dg._zdata.rows,
+				dur = dg._zdata.dur + rows,
+				days = cols * zkCalendars.DAYTIME,
+				cmp = $outer(cnt),
+				tzOffset = $int(getZKAttr(cmp, "tz")),
+				bd = new Date($int(getZKAttr(cmp, "bd")) + days),
+				bd1 = zkCalendars.fixTimeZoneFromServer(bd, tzOffset),
+				ofs = zkCalendars._getTimeOffset(bd1, false, rows),
+				ofs1 = zkCalendars._getTimeOffset(bd1, false, dur);
+				zkau.send({uuid: cmp.id, cmd: "onEventCreate", data: [bd.getTime() + ofs,
+				bd.getTime() + ofs1, Event.pointerX(evt), Event.pointerY(evt),
+				zk.innerWidth(), zk.innerHeight()]}, 100);
+
+			zkCalendars._ghost[cmp.id] = function () {
+				zk.remove($e(cmp.id, 'dd'));
+				delete zkCalendars._ghost[cmp.id];
+			};
 		}
+		// fix opera jumping
+		if (zk.opera) cnt.scrollTop = zkCalendars._scrollInfo[cmp.id];
+		dg._zchanged = dg._zecnt = dg._zrzoffs = dg._zrs = dg._zdata = dg._zcells = dg._zoffs = dg._zevt = null;
 	},
 	// daylong dragdrop
 	_ignoreDaylongDrag: function (daylong, p, evt) {
@@ -1470,7 +1469,7 @@ zkCalendarsMonth = {
 		Event.stop(evt);
 	},
 	_ignoredrag: function (cnt, p, evt) {
-		if (zkau.processing()) return true;
+		if (zkau.processing() || !zkCalendarsMonth._drag[cnt.id]) return true;
 		var cmp = $outer(cnt),
 			zcls = getZKAttr(cmp, "zcls"),
 			cls = zcls + "-evt-faker-more",
