@@ -45,7 +45,7 @@ zk.override(zDraggable.prototype, "initDrag",  _zkdd, function (event) {
 	    var pos = zPos.cumulativeOffset(this.element);
 	    this.offset = [0,1].map( function(i) { return (pointer[i] - pos[i]); });
 
-		zDraggables.activate(this);
+		zDraggables.activate(this, pointer);
 	//Jumper Chen, Potix: Bug #1845026
 	//We need to ensure that the onBlur event is fired before the onSelect event for consistent among four browsers.
 		if (zkau.currentFocus && Event.element(event) != zkau.currentFocus
