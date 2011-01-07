@@ -12,7 +12,7 @@ Copyright (C) 2009 Potix Corporation. All Rights Reserved.
 This program is distributed under GPL Version 2.0 in the hope that
 it will be useful, but WITHOUT ANY WARRANTY.
 */
-//zk.load("calendar.lang.msgcal*"); 
+zk.load("calendar.lang.msgcal*"); 
 
 var _zkdd = {};
 zk.override(zDraggable.prototype, "initDrag",  _zkdd, function (event) {
