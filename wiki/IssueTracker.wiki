@@ -1,3 +1,4 @@
+#labels Featured
 #ZK Calendar Issue Tracker
 
 The ZK Calendar team has moved the issue tracker from Google Code to our own system at http://tracker.zkoss.org/browse/ZKCAL. Please adopt to the new system.
