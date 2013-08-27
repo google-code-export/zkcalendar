@@ -82,4 +82,13 @@ public interface CalendarEvent {
 	 * Returns whether the calendar event is locked or not.
 	 */
 	public boolean isLocked();
+	
+	/**
+	 * Returns then name of the icon.
+	 * <ul>
+	 * <li>alarm1-10</li>
+	 * <li>alarm-bell</li>
+	 * </ul>
+	 */
+	public String getIcon();
 }

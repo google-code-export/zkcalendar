@@ -30,11 +30,11 @@ calendar.DayEvent = zk.$extends(calendar.Event, {
 				'<div class="', p.t2, '"', headerStyle, '>',
 				'<div class="', p.t3, '"></div></div>',
 				'<div id="', id, '-body" class="', p.body, '"', headerStyle, '>',
-				'<div class="', p.inner, '"', headerStyle, '>',
+				'<div class="', p.inner, '"', headerStyle, ' title="',this.renderContent(ce),'">',
 				'<dl id="', id, '-inner"', contentStyle, '>',
 				'<dt id="', id, '-hd" class="', p.header, '"', headerStyle, '>', this.getEvtTitle(ce), '</dt>',
 				'<dd id="', id, '-cnt" class="', p.content, '"', contentStyle, '>',
-				'<div class="', p.text, '">', ce.content, '</div></dd>');		
+				'<div class="', p.text, '">', this.renderContent(ce), '</div></dd>');		
 		// resizer
 		if (!ce.isLocked)
 			out.push(p._resizerCnt);
@@ -45,6 +45,11 @@ calendar.DayEvent = zk.$extends(calendar.Event, {
 			'<div class="', p.b3, '"></div></div>',
 			'<div class="', p.b1, '"', headerStyle, '></div></div>');
 	},
+	
+	renderContent: function(ce) {
+		return ce.content;
+	},
+	
 	bind_: function (e){
 		this.$supers('bind_', arguments);
 		var ce = this.event;
@@ -73,10 +78,12 @@ calendar.DayEvent = zk.$extends(calendar.Event, {
 	},
 	getEvtTitle: function(ce) {
 		var bd = ce.zoneBd,
-			ed = ce.zoneEd;
-		return  ce.title ? ce.title: (ed - bd < (7200000/this.parent._timeslots)) ? 
+			ed = ce.zoneEd,
+			icon = ce.icon ? '<i class="z-calendar-icon z-calendar-icon-'+ce.icon+'">&nbsp;</i>': '';
+		return  (ce.title ? ce.title: (ed - bd < (7200000/this.parent._timeslots)) ? 
 				(zk.fmt.Date.formatDate(bd,'HH:mm') + ' - ' + ce.content):
-				(zk.fmt.Date.formatDate(bd,'HH:mm') + ' - ' + zk.fmt.Date.formatDate(ed,'HH:mm'));	
+				(zk.fmt.Date.formatDate(bd,'HH:mm') + ' - ' + zk.fmt.Date.formatDate(ed,'HH:mm'))) + 
+				icon;	
 	},
 	
 	update: function(updateLastModify) {

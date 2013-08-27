@@ -21,6 +21,7 @@ import java.util.Map.Entry;
 import org.zkoss.calendar.Calendars;
 import org.zkoss.calendar.api.*;
 import org.zkoss.json.JSONObject;
+import org.zkoss.lang.Strings;
 import org.zkoss.util.Locales;
 import org.zkoss.xml.XMLs;
 
@@ -172,7 +173,9 @@ public class Util {
 		json.put("endDate", String.valueOf(getDSTTime(timezone ,ce.getEndDate())));
 		json.put("isLocked", String.valueOf(ce.isLocked()));
 		json.put("zclass", ce.getZclass());
-		
+		String icon = ce.getIcon();
+		if (!Strings.isBlank(icon))
+			json.put("icon", icon);
 		sb.append(json.toString()).append(",");
 	}
 	

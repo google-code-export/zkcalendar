@@ -115,6 +115,7 @@ public class Calendars extends XulElement {
 		addClientEvent(Calendars.class, CalendarsEvent.ON_EVENT_UPDATE, 0);
 		addClientEvent(Calendars.class, CalendarsEvent.ON_DAY_CLICK, CE_REPEAT_IGNORE);
 		addClientEvent(Calendars.class, CalendarsEvent.ON_WEEK_CLICK, CE_REPEAT_IGNORE);
+		addClientEvent(Calendars.class, CalendarsEvent.ON_EVENT_ICON_CLICK, CE_REPEAT_IGNORE);
 	}	
 	
 	public Calendars() {
@@ -944,6 +945,8 @@ public class Calendars extends XulElement {
 			Events.postEvent(CalendarsEvent.getClickEvent(request, cmd));
 		else if (cmd.equals(Events.ON_DROP)) {
 			Events.postEvent(CalendarDropEvent.getCalendarDropEvent(request));
+		} else if (cmd.equals(CalendarsEvent.ON_EVENT_ICON_CLICK)) {
+			Events.postEvent(CalendarsEvent.getEventIconClickEvent(request));
 		} else super.service(request, everError);
 	}	
 
