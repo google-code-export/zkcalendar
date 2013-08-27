@@ -49,6 +49,7 @@ public class CalendarsEvent extends Event {
 	public static final String ON_EVENT_UPDATE = "onEventUpdate";
 	public static final String ON_DAY_CLICK = "onDayClick";
 	public static final String ON_WEEK_CLICK = "onWeekClick";
+	public static final String ON_EVENT_ICON_CLICK = "onEventIconClick";
 	
 	private Date _beginDate;
 
@@ -121,6 +122,19 @@ public class CalendarsEvent extends Event {
 		final Calendars cmp = verifyEvent(request, data, 1);		
 		
 		return new Event(cmd, cmp, Util.fixDSTTime(cmp.getDefaultTimeZone(), new Date(getLong(data.get(0)))));
+	}
+	
+	public static Event getEventIconClickEvent(AuRequest request) {
+		final JSONArray data = (JSONArray) request.getData().get("data");
+		final Calendars cmp = verifyEvent(request, data, 5);
+		
+		CalendarEvent ce = cmp.getCalendarEventById(String.valueOf(data.get(0)));
+		
+		if (ce == null) return null;
+		
+		return new CalendarsEvent(ON_EVENT_ICON_CLICK, cmp, ce, null, null,
+				getInt(data.get(1)), getInt(data.get(2)),
+				getInt(data.get(3)), getInt(data.get(4)));
 	}
 	
 	private static int getInt(Object obj){

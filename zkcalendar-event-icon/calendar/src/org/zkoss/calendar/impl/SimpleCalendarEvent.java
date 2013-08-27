@@ -31,6 +31,7 @@ public class SimpleCalendarEvent implements CalendarEvent, Serializable {
 	private String _contentColor = "";
 	private String _content = "";
 	private String _title = "";
+	private String _icon;
 	private Date _beginDate;
 	private Date _endDate;
 	private boolean _locked;
@@ -85,5 +86,18 @@ public class SimpleCalendarEvent implements CalendarEvent, Serializable {
 	}
 	public void setLocked(boolean locked) {
 		_locked = locked;
+	}
+	public String getIcon() {
+		return _icon;
+	}
+	/**
+	 * Sets then name of the icon.
+	 * <ul>
+	 * <li>alarm1-10</li>
+	 * <li>alarm-bell</li>
+	 * </ul>
+	 */
+	public void setIcon(String icon) {
+		_icon = icon;
 	}
 }

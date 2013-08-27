@@ -948,8 +948,10 @@ calendar.CalendarsDefault = zk.$extends(calendar.Calendars, {
 		var ce = zk.Widget.$(evt.target).event;
 		
 		if (ce) {
-			widget.fire("onEventEdit",{
-				data: [ce.id,p[0],p[1], jq.innerWidth(),jq.innerHeight()]});
+			var evtName = jq(evt.target).hasClass('z-calendar-icon')?
+				'onEventIconClick': 'onEventEdit';
+			widget.fire(evtName,{
+				data: [ce.id ,p[0],p[1], jq.innerWidth(),jq.innerHeight()]});
 		} else {
 			var ts = widget.ts,
 				row = widget.cntRows,
@@ -1018,8 +1020,10 @@ calendar.CalendarsDefault = zk.$extends(calendar.Calendars, {
 		var widget = zk.Widget.$(daylong),
 			ce = zk.Widget.$(evt.target).event;
 			
-		if (ce) {		
-			widget.fire("onEventEdit",{
+		if (ce) {
+			var evtName = jq(evt.target).hasClass('z-calendar-icon')?
+				'onEventIconClick': 'onEventEdit';
+			widget.fire(evtName,{
 				data: [ce.id,evt.pageX,evt.pageY, jq.innerWidth(),jq.innerHeight()]});				
 		} else {
 			var zcls = widget.getZclass(),

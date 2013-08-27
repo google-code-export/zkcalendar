@@ -225,9 +225,9 @@ ${z:setCWRCacheControl()}
 	width: 100%;
 }
 .z-calendars-hour-sep {
-	height: 22px;
 	border-bottom: 1px dotted ${separatorColor};
 	border-top: 1px solid ${separatorColor};
+	height: 22px;
 	line-height: 22px;
 	margin-bottom: 22px;
 	font-size: 22px;
@@ -822,3 +822,26 @@ ${z:setCWRCacheControl()}
 	cursor: pointer;	
 	text-decoration: underline;
 }
+
+.z-calendar-icon {
+	background-repeat: no-repeat;
+	display: inline-block;
+	margin-left: 5px;
+	margin-top: 3px;
+	margin-bottom: 3px;
+}
+
+.z-calendar-icon-alarm1-10 {
+ 	width: 10px;
+	height: 10px;
+	line-height: 10px;
+	background-image: url(${c:encodeURL('~./js/calendar/img/alarm1_10px.png')});
+ }
+ 
+ .z-calendar-icon-alarm-bell {
+ 	width: 10px;
+	height: 10px;
+	line-height: 10px;
+	background-image: url(${c:encodeURL('~./js/calendar/img/alarm_bell.png')});
+ }
+ 

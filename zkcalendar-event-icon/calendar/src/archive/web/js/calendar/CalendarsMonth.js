@@ -545,7 +545,9 @@ calendar.CalendarsMonth = zk.$extends(calendar.Calendars, {
 		if (jq(node).hasClass(zcls + '-evt-faker-more') && node.parentNode.id.indexOf('-frow') > 0) return;
 		
 		if (ce) {
-			widget.fire("onEventEdit", {
+			var evtName = jq(evt.target).hasClass('z-calendar-icon')?
+				'onEventIconClick': 'onEventEdit';
+			widget.fire(evtName, {
 				data: [ce.id,evt.pageX,evt.pageY, jq.innerWidth(),jq.innerHeight()]});			
 		} else {
 			var cmp = widget.$n(),				

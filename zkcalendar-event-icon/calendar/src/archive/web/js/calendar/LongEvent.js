@@ -46,10 +46,15 @@ calendar.LongEvent = zk.$extends(calendar.Event, {
 		if (isAfter)
 			out.push(p.right_arrowCnt);
 	
-		out.push('<div class="', p.text, '">', ce.content, '</div></div></div></div>',
+		out.push('<div class="', p.text, '">', this.renderContent(ce), '</div></div></div></div>',
 				'<div class="', p.b2, '"', headerStyle, '>',
 				'<div class="', p.b3, '"', cornerStyle, '></div></div>',
 				'<div class="', p.b1, '"', headerStyle, '></div></div>');
+	},
+	
+	renderContent: function(ce) {
+		return ce.content + (ce.icon ? 
+			'<i class="z-calendar-icon z-calendar-icon-'+ce.icon+'">&nbsp;</i>': '');
 	},
 	
 	update: function(updateLastModify) {
